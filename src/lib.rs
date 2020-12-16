@@ -2,3 +2,4 @@
 
 mod complex;
 mod fft;
+mod analysis;

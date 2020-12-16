@@ -151,4 +151,31 @@ mod tests {
             Complex::new(-1.0, 2.0),
         ]});
     }
+
+    #[test]
+    fn test_wav() {
+        use hound;
+        use plotters::prelude::*;
+        let mut reader = hound::WavReader::open("sine.wav").unwrap();
+        let samples: Vec<f64> = reader.samples::<i16>().flat_map(|s| s).map(|s| s as f64).collect();
+        let n = 8192;
+        let samp_rate = reader.spec().sample_rate;
+        let bin_size = (samp_rate as f64) / (n as f64);
+        let result: Vec<f64> = fft(samples[0..n].to_vec()).data.iter().map(|c| c.mag() / n as f64).collect();
+        let root = BitMapBackend::new("plot.png", (640, 480)).into_drawing_area();
+        root.fill(&WHITE);
+        let mut chart = ChartBuilder::on(&root)
+            .margin(5)
+            .x_label_area_size(80)
+            .y_label_area_size(80)
+            .build_ranged(0f64..1000f64, 0f64..10000f64)
+            .unwrap();
+        chart.configure_mesh().draw().unwrap();
+        chart.draw_series(LineSeries::new((0..n).map(|x| (x as f64 * bin_size, result[x] as f64)), &RED));
+        chart.configure_series_labels()
+            .background_style(&WHITE.mix(0.8))
+            .border_style(&BLACK)
+            .draw()
+            .unwrap();
+    }
 }
