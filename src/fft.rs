@@ -67,10 +67,8 @@ fn fft_general(vec: FFTVec, inverse: bool) -> FFTVec {
         vec
     } else {
         let (even, odd) = vec.split();
-        let even_fft = fft_general(even, inverse);
-        let mut odd_fft = fft_general(odd, inverse);
-        let mut result = even_fft;
-        result.data.extend(odd_fft.data.drain(..));
+        let mut result = fft_general(even, inverse);
+        result.data.extend(fft_general(odd, inverse).data);
         for k in 0 .. n/2 {
             let x_k = result.data[k];
             let w = if inverse {
